@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14172e">
+<title>Echo – Memory Game</title>
+<meta name="description" content="Echo is a free brain-training game: memory patterns, number recall and quick sums. No sign-up, no ads, works offline.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Echo">
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f1ff;--ink:#1b1b3a;--soft:#5d5c85;--card:#ffffff;--line:#d9d5f5;--t0:#1fb5a3;--t1:#f2a23a;--t2:#ee5d7a;--t3:#7a62e8;--btn:#1b1b3a;--btnink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14172e;--ink:#f1efff;--soft:#a5a3d1;--card:#1f2344;--line:#353a6b;--btn:#f1efff;--btnink:#14172e}}
+:root[data-theme="dark"]{--bg:#14172e;--ink:#f1efff;--soft:#a5a3d1;--card:#1f2344;--line:#353a6b;--btn:#f1efff;--btnink:#14172e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ink);font-family:"Fredoka",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;touch-action:manipulation;user-select:none;-webkit-user-select:none;overflow-y:auto}
+main{width:100%;max-width:460px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;margin:auto 0}
+[hidden]{display:none!important}
+section{width:100%;display:flex;flex-direction:column;align-items:center;gap:16px}
+h1{font-size:2.4rem;margin:0;font-weight:600}
+h2{font-size:1rem;margin:0;font-weight:600;color:var(--soft);align-self:flex-start}
+.tag{color:var(--soft);margin:-8px 0 0;text-align:center}
+.opts{width:100%;display:grid;gap:8px}
+.opt{font:inherit;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:18px;padding:10px 14px;cursor:pointer}
+.opt b{display:block;font-size:1.15rem}.opt span{font-size:.9rem;color:var(--soft)}
+.opt[aria-checked="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
+.seg{display:grid;grid-template-columns:repeat(3,1fr)}
+.seg .opt{text-align:center;padding:10px 4px;font-weight:600}
+.btn{font:inherit;font-size:1.3rem;font-weight:600;background:var(--btn);color:var(--btnink);border:0;border-radius:999px;padding:12px 40px;cursor:pointer}
+.ghost{background:transparent;color:var(--soft);font-size:1rem;padding:8px 16px;border:2px solid var(--soft)}
+.btn:focus-visible,.opt:focus-visible,.tile:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+.top{width:100%;display:flex;justify-content:space-between;align-items:center}
+.stats{display:flex;gap:8px}
+.stat{background:var(--card);border-radius:14px;padding:4px 12px;text-align:center;min-width:60px}
+.stat b{display:block;font-size:1.3rem;line-height:1.1}.stat span{font-size:.75rem;color:var(--soft)}
+.hearts{font-size:1.6rem;letter-spacing:2px;color:var(--t2)}.hearts i{font-style:normal}.hearts i.lost{opacity:.2}
+#modeName{font-weight:600}
+#msg{min-height:2.4em;font-size:1.2rem;text-align:center;color:var(--soft);margin:0}
+#board{width:min(100%,370px);aspect-ratio:1;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{border:0;border-radius:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.55;transition:transform .08s,opacity .08s,filter .08s}
+.tile svg{width:38%;height:38%;fill:#fff}
+.tile.on{opacity:1;transform:scale(1.05);filter:brightness(1.15) saturate(1.2);box-shadow:0 0 0 5px var(--ink) inset}
+#board.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@media (prefers-reduced-motion:reduce){#board.shake{animation:none}.tile{transition:none}}
+.t0{background:var(--t0)}.t1{background:var(--t1)}.t2{background:var(--t2)}.t3{background:var(--t3)}
+#over{background:var(--card);border-radius:22px;padding:16px;text-align:center;width:100%}
+#over .big{font-size:3rem;font-weight:600;line-height:1}
+#over p{margin:4px 0 12px;color:var(--soft)}
+.best{font-size:.9rem;color:var(--soft);text-align:center;margin:0}
+.streak{font-size:1.1rem;font-weight:600;color:var(--ink);margin:0}
+#nums{width:100%;display:flex;flex-direction:column;align-items:center;gap:14px}
+.numshow{font-size:2.6rem;font-weight:600;letter-spacing:.08em;text-align:center;min-height:1.4em;word-break:break-all;background:var(--card);border-radius:22px;padding:22px 12px;width:100%;font-variant-numeric:tabular-nums}
+.numshow.ok{color:var(--t0)}.numshow.bad{color:var(--t2)}
+.how{width:100%;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px 14px;font-size:.95rem;color:var(--soft)}
+.how b{color:var(--ink)}.how p{margin:0 0 8px}.how p:last-child{margin:0}
+#sums{width:100%;display:flex;flex-direction:column;align-items:center;gap:14px}
+.bar{width:100%;height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--t3)}
+#choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+#choices .key{padding:20px 0;font-size:2rem}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(100%,320px)}
+.key{font:inherit;font-size:1.8rem;font-weight:600;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:18px;padding:14px 0;cursor:pointer}
+.key:active{background:var(--line)}
+.badges{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.badge{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:8px 10px;opacity:.5}
+.badge b{display:block;font-size:.95rem}.badge span{font-size:.8rem;color:var(--soft)}
+.badge.got{opacity:1;border-color:var(--t1)}.badge.got b::before{content:"★ ";color:var(--t1)}
+</style>
+</head>
+<body>
+<main>
+<section id="menu">
+  <h1>Echo</h1>
+  <p class="tag">Train your memory. Beat your best.</p>
+  <h2 id="hm">Choose a mode</h2>
+  <div class="opts" role="radiogroup" aria-labelledby="hm" id="modes">
+    <button class="opt" role="radio" data-v="classic"><b>Classic</b><span>Repeat the pattern in order.</span></button>
+    <button class="opt" role="radio" data-v="reverse"><b>Reverse</b><span>Repeat it backwards. Last one first.</span></button>
+    <button class="opt" role="radio" data-v="daily"><b>Daily</b><span>Today's pattern, the same for everyone.</span></button>
+    <button class="opt" role="radio" data-v="numbers"><b>Number Flash</b><span>A number appears, then vanishes. Type it from memory.</span></button>
+    <button class="opt" role="radio" data-v="sums"><b>Quick Sums</b><span>Solve mental maths against the clock. It gets harder.</span></button>
+  </div>
+  <h2 id="hs">Speed</h2>
+  <div class="opts seg" role="radiogroup" aria-labelledby="hs" id="speeds">
+    <button class="opt" role="radio" data-v="calm">Calm</button>
+    <button class="opt" role="radio" data-v="normal">Normal</button>
+    <button class="opt" role="radio" data-v="quick">Quick</button>
+  </div>
+  <div class="how" id="how" hidden></div>
+  <button class="btn" id="start">Start</button>
+  <p class="best" id="menuBest"></p>
+  <p class="streak" id="streak"></p>
+  <h2>Badges</h2>
+  <div class="badges" id="badges"></div>
+  <div class="row"><button class="btn ghost" id="howBtn" aria-expanded="false">How to play</button><button class="btn ghost" id="snd" aria-pressed="true">Sound on</button></div>
+</section>
+
+<section id="game" hidden>
+  <div class="top">
+    <div><div id="modeName"></div><div class="hearts" id="hearts" aria-label="Lives"></div></div>
+    <div class="stats">
+      <div class="stat"><b id="round">0</b><span>Round</span></div>
+      <div class="stat"><b id="best">0</b><span>Best</span></div>
+    </div>
+  </div>
+  <p id="msg" aria-live="polite"></p>
+  <div id="board" role="group" aria-label="Game pad">
+    <button class="tile t0" data-i="0" aria-label="Circle, teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></button>
+    <button class="tile t1" data-i="1" aria-label="Square, amber"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/></svg></button>
+    <button class="tile t2" data-i="2" aria-label="Triangle, pink"><svg viewBox="0 0 24 24"><path d="M12 2 23 22H1z"/></svg></button>
+    <button class="tile t3" data-i="3" aria-label="Diamond, violet"><svg viewBox="0 0 24 24"><path d="M12 1 23 12 12 23 1 12z"/></svg></button>
+  </div>
+  <div id="nums" hidden>
+    <div class="numshow" id="numShow" aria-live="polite"></div>
+    <div class="pad" id="numpad" hidden></div>
+  </div>
+  <div id="sums" hidden>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="numshow" id="sumQ" aria-live="polite"></div>
+    <div id="choices"></div>
+  </div>
+  <div id="over" hidden>
+    <div class="big" id="finalScore">0</div>
+    <p id="finalMsg"></p>
+    <p id="unlock" class="best"></p>
+    <div class="row">
+      <button class="btn" id="again">Play again</button>
+      <button class="btn ghost" id="share">Share</button>
+      <button class="btn ghost" id="toMenu">Menu</button>
+    </div>
+  </div>
+  <button class="btn ghost" id="quit">Menu</button>
+</section>
+</main>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var tiles=[].slice.call(document.querySelectorAll('.tile')),board=$('board'),msg=$('msg');
+var NAMES={classic:'Classic',reverse:'Reverse',daily:'Daily',numbers:'Number Flash',sums:'Quick Sums'};
+var BASE={calm:700,normal:520,quick:380};
+var settings={mode:'classic',speed:'normal'},bests={};
+var seq=[],pos=0,done=0,lives=3,accepting=false,running=false,soundOn=true,ctx=null,token=0,rng=null;
+var freqs=[262,330,392,523];
+function today(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+try{var s=JSON.parse(localStorage.getItem('echo-settings'));if(s&&NAMES[s.mode]&&BASE[s.speed])settings=s;bests=JSON.parse(localStorage.getItem('echo-bests'))||{}}catch(e){}
+function save(){try{localStorage.setItem('echo-settings',JSON.stringify(settings));localStorage.setItem('echo-bests',JSON.stringify(bests))}catch(e){}}
+var stats={streak:0,last:'',played:0,badges:{}};
+try{var st=JSON.parse(localStorage.getItem('echo-stats'));if(st&&st.badges)stats=st}catch(e){}
+function saveStats(){try{localStorage.setItem('echo-stats',JSON.stringify(stats))}catch(e){}}
+function dayStr(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function yesterday(){var y=new Date();y.setDate(y.getDate()-1);return dayStr(y)}
+var BADGES=[
+{id:'first',n:'First steps',d:'Finish a game',t:function(c){return true}},
+{id:'r5',n:'Warm-up',d:'Reach round 5',t:function(c){return c.done>=5}},
+{id:'r10',n:'Sharp mind',d:'Reach round 10',t:function(c){return c.done>=10}},
+{id:'r15',n:'Memory master',d:'Reach round 15',t:function(c){return c.done>=15}},
+{id:'rev',n:'Backwards thinker',d:'Round 5 in Reverse',t:function(c){return c.mode==='reverse'&&c.done>=5}},
+{id:'quick',n:'Quick fingers',d:'Round 8 on Quick',t:function(c){return c.speed==='quick'&&c.done>=8}},
+{id:'daily',n:'Daily player',d:'Finish a Daily game',t:function(c){return c.mode==='daily'}},
+{id:'nums',n:'Number cruncher',d:'Round 6 in Number Flash',t:function(c){return c.mode==='numbers'&&c.done>=6}},
+{id:'sums',n:'Quick thinker',d:'Round 8 in Quick Sums',t:function(c){return c.mode==='sums'&&c.done>=8}},
+{id:'s3',n:'Three in a row',d:'Play 3 days running',t:function(c){return c.streak>=3}},
+{id:'s7',n:'Week streak',d:'Play 7 days running',t:function(c){return c.streak>=7}}
+];
+function renderExtras(){
+  var s=(stats.last===today()||stats.last===yesterday())?stats.streak:0;
+  $('streak').textContent=s?s+(s===1?' day':' days')+' in a row 🔥':'Play today to start a streak';
+  $('badges').innerHTML=BADGES.map(function(b){return '<div class="badge'+(stats.badges[b.id]?' got':'')+'"><b>'+b.n+'</b><span>'+b.d+'</span></div>'}).join('');
+}
+function recordGame(){
+  var t=today();
+  if(stats.last!==t){stats.streak=(stats.last===yesterday())?stats.streak+1:1;stats.last=t}
+  stats.played++;
+  var c={done:done,mode:settings.mode,speed:settings.speed,streak:stats.streak},fresh=[];
+  BADGES.forEach(function(b){if(!stats.badges[b.id]&&b.t(c)){stats.badges[b.id]=1;fresh.push(b.n)}});
+  saveStats();
+  $('unlock').textContent=fresh.length?'Badge unlocked: '+fresh.join(', '):'';
+}
+function key(){return settings.mode==='daily'?'daily-'+today()+'-'+settings.speed:settings.mode+'-'+settings.speed}
+function getBest(){return bests[key()]||0}
+
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function seedFrom(str){var h=2166136261;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+
+function renderMenu(){renderExtras();renderHow();
+  [].forEach.call(document.querySelectorAll('#modes .opt'),function(b){b.setAttribute('aria-checked',b.dataset.v===settings.mode)});
+  [].forEach.call(document.querySelectorAll('#speeds .opt'),function(b){b.setAttribute('aria-checked',b.dataset.v===settings.speed)});
+  var b=getBest();$('menuBest').textContent=b?'Your best here: '+b+(b===1?' round':' rounds'):'No score here yet. Be the first!';
+}
+['modes','speeds'].forEach(function(id){
+  $(id).addEventListener('click',function(e){var b=e.target.closest('.opt');if(!b)return;settings[id==='modes'?'mode':'speed']=b.dataset.v;save();renderMenu()});
+});
+
+function tone(i,dur,type){
+  if(!soundOn)return;
+  try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();
+    var o=ctx.createOscillator(),g=ctx.createGain();o.type=type||'sine';o.frequency.value=i<0?110:freqs[i];
+    g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.3,ctx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur/1000);
+    o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+dur/1000+.05);}catch(e){}
+}
+function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}}
+function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function flash(i,ms){tiles[i].classList.add('on');tone(i,ms);return wait(ms).then(function(){tiles[i].classList.remove('on')})}
+function lock(l){accepting=!l;board.style.cursor=l?'default':'pointer'}
+function hearts(){var h='';for(var i=0;i<3;i++)h+='<i class="'+(i<lives?'':'lost')+'">♥</i>';$('hearts').innerHTML=h;$('hearts').setAttribute('aria-label',lives+' lives left')}
+
+function showSeq(){
+  var my=token;lock(true);
+  msg.textContent=settings.mode==='reverse'?'Watch, then go backwards…':'Watch…';
+  var sp=Math.max(BASE[settings.speed]*.55,BASE[settings.speed]-seq.length*18)*(settings.mode==='reverse'?1.25:1);
+  var p=wait(650);
+  seq.forEach(function(s){p=p.then(function(){if(my!==token)throw 0;return flash(s,sp)}).then(function(){return wait(sp*.45)})});
+  p.then(function(){if(my!==token)return;pos=0;msg.textContent=settings.mode==='reverse'?'Your turn: last one first':'Your turn';lock(false)}).catch(function(){});
+}
+function addStep(){seq.push(settings.mode==='daily'?Math.floor(rng()*4):Math.floor(Math.random()*4));$('round').textContent=seq.length}
+function expected(){return settings.mode==='reverse'?seq[seq.length-1-pos]:seq[pos]}
+
+function start(){
+  token++;seq=[];done=0;lives=3;running=true;
+  rng=settings.mode==='daily'?mulberry(seedFrom(today())):null;
+  $('menu').hidden=true;$('game').hidden=false;$('over').hidden=true;$('quit').hidden=false;
+  board.hidden=settings.mode==='numbers'||settings.mode==='sums';$('nums').hidden=settings.mode!=='numbers';$('sums').hidden=settings.mode!=='sums';$('numpad').hidden=true;
+  $('modeName').textContent=NAMES[settings.mode]+' · '+settings.speed;$('best').textContent=getBest();$('round').textContent=0;
+  hearts();if(settings.mode==='sums'){lock(true);sumRound();return}if(settings.mode==='numbers'){lock(true);numRound();return}addStep();showSeq();
+}
+function end(){
+  running=false;lock(true);numAccept=false;sumAccept=false;clearTimeout(sumTimer);$('sums').hidden=true;$('numpad').hidden=true;tone(-1,500,'sawtooth');buzz(200);
+  var rec=done>getBest();if(rec){bests[key()]=done;save();$('best').textContent=done}
+  recordGame();$('finalScore').textContent=done;
+  $('finalMsg').textContent=(rec&&done>0)?'New best! You held '+done+' steps in mind.':(done===1?'round completed':'rounds completed');
+  $('over').hidden=false;$('quit').hidden=true;msg.textContent='';
+}
+function press(i){
+  if(!accepting||!running)return;
+  flash(i,170);
+  if(i!==expected()){
+    lives--;hearts();buzz(120);board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake');
+    if(lives<=0){end();return}
+    lock(true);msg.textContent='Not quite. Watch again.';tone(-1,250,'sawtooth');
+    var my=token;wait(1100).then(function(){if(my===token&&running)showSeq()});return;
+  }
+  pos++;
+  if(pos===seq.length){
+    done=seq.length;lock(true);msg.textContent=['Nice!','Sharp!','Great memory!','Wow!'][done%4];
+    if(done>getBest())$('best').textContent=done;
+    var my2=token;wait(800).then(function(){if(my2===token&&running){addStep();showSeq()}});
+  }
+}
+tiles.forEach(function(t,i){
+  t.addEventListener('pointerdown',function(e){e.preventDefault();press(i)});
+  t.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();press(i)}});
+});
+document.addEventListener('keydown',function(e){var n=parseInt(e.key,10);if(n>=1&&n<=4)press(n-1)});
+
+var numTarget='',numInput='',numAccept=false;
+function spaced(s){return s.split('').join(' ')}
+function numDraw(){var a=[];for(var i=0;i<numTarget.length;i++)a.push(i<numInput.length?numInput.charAt(i):'_');$('numShow').textContent=a.join(' ')}
+function numRound(){
+  var my=token,len=done+(settings.speed==='calm'?3:4);numAccept=false;numInput='';numTarget='';
+  for(var i=0;i<len;i++)numTarget+=Math.floor(Math.random()*10);
+  $('round').textContent=done+1;$('numpad').hidden=true;
+  $('numShow').className='numshow';$('numShow').textContent=spaced(numTarget);
+  msg.textContent='Memorise it…';
+  wait(700+len*({calm:700,normal:520,quick:380}[settings.speed])*(len<=6?1:Math.max(.7,1-(len-6)*.05))).then(function(){
+    if(my!==token||!running)return;
+    numAccept=true;$('numpad').hidden=false;msg.textContent='Type it from memory';numDraw();
+  });
+}
+function numCheck(){
+  numAccept=false;var my=token;
+  if(numInput===numTarget){
+    done++;if(done>getBest())$('best').textContent=done;
+    $('numShow').className='numshow ok';tone(3,200);msg.textContent=['Nice!','Sharp!','Great memory!','Wow!'][done%4];
+    wait(900).then(function(){if(my===token&&running)numRound()});
+  }else{
+    lives--;hearts();buzz(120);tone(-1,300,'sawtooth');
+    $('numShow').className='numshow bad';$('numShow').textContent=spaced(numTarget);msg.textContent='It was this one.';
+    if(lives<=0)wait(1500).then(function(){if(my===token&&running)end()});
+    else wait(1600).then(function(){if(my===token&&running)numRound()});
+  }
+}
+function numKey(k){
+  if(!numAccept)return;
+  if(k==='b')numInput=numInput.slice(0,-1);else if(numInput.length<numTarget.length)numInput+=k;
+  numDraw();if(numInput.length===numTarget.length)numCheck();
+}
+['1','2','3','4','5','6','7','8','9','','0','b'].forEach(function(k){
+  var b=document.createElement('button');b.className='key';
+  if(!k){b.style.visibility='hidden';b.disabled=true}
+  else{b.textContent=k==='b'?'⌫':k;b.setAttribute('aria-label',k==='b'?'Delete':k);b.addEventListener('pointerdown',function(e){e.preventDefault();numKey(k)})}
+  $('numpad').appendChild(b);
+});
+document.addEventListener('keydown',function(e){
+  if(settings.mode!=='numbers')return;
+  if(/^[0-9]$/.test(e.key))numKey(e.key);else if(e.key==='Backspace')numKey('b');
+});
+var sumTimer=null,sumAnswer=0,sumAccept=false;
+function rint(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function sumTier(n){return n<4?0:n<8?1:n<14?2:3}
+function makeSum(n){
+  var x,y,z,r=Math.random(),q,a,t=sumTier(n);
+  if(t===0){x=rint(2,12);y=rint(2,12);
+    if(r<.5){q=x+' + '+y;a=x+y}else{if(y>x){z=x;x=y;y=z}q=x+' \u2212 '+y;a=x-y}}
+  else if(t===1){
+    if(r<.35){x=rint(12,60);y=rint(12,40);q=x+' + '+y;a=x+y}
+    else if(r<.65){x=rint(40,99);y=rint(11,39);q=x+' \u2212 '+y;a=x-y}
+    else{x=rint(3,9);y=rint(3,9);q=x+' \u00d7 '+y;a=x*y}}
+  else if(t===2){
+    if(r<.4){x=rint(6,12);y=rint(6,15);q=x+' \u00d7 '+y;a=x*y}
+    else if(r<.7){x=rint(20,80);y=rint(10,50);z=rint(5,30);q=x+' + '+y+' \u2212 '+z;a=x+y-z}
+    else{x=rint(2,9);y=rint(2,9);z=rint(2,20);q=x+' \u00d7 '+y+' + '+z;a=x*y+z}}
+  else{
+    if(r<.35){x=rint(11,19);y=rint(3,9);q=x+' \u00d7 '+y;a=x*y}
+    else if(r<.7){x=rint(30,90);y=rint(20,70);z=rint(10,40);q=x+' + '+y+' \u2212 '+z;a=x+y-z}
+    else{x=rint(6,12);y=rint(6,15);z=rint(5,35);q=x+' \u00d7 '+y+' \u2212 '+z;a=x*y-z}}
+  return{q:q,a:a};
+}
+function sumRound(){
+  var my=token,s=makeSum(done),opts=[s.a],tries=0;
+  sumAnswer=s.a;$('round').textContent=done+1;
+  $('sumQ').textContent=s.q+' = ?';$('sumQ').className='numshow';
+  var near=done>=4?[1,2,3,5,10]:[1,2,3,4,5,6,7,8,9,10];
+  while(opts.length<4&&tries++<60){var d=s.a+near[rint(0,near.length-1)]*(Math.random()<.5?-1:1);if(d>=0&&opts.indexOf(d)<0)opts.push(d)}
+  while(opts.length<4)opts.push(s.a+opts.length+10);
+  opts.sort(function(){return Math.random()-.5});
+  var box=$('choices');box.innerHTML='';
+  opts.forEach(function(v){var b=document.createElement('button');b.className='key';b.textContent=v;b.addEventListener('pointerdown',function(e){e.preventDefault();sumResult(v===sumAnswer,false)});box.appendChild(b)});
+  sumAccept=true;msg.textContent='Pick the answer';
+  var ms=Math.round({calm:14000,normal:9000,quick:5500}[settings.speed]*[.6,.85,1.1,1.25][sumTier(done)]),f=$('barFill');
+  f.style.transition='none';f.style.width='100%';void f.offsetWidth;f.style.transition='width '+ms+'ms linear';f.style.width='0%';
+  clearTimeout(sumTimer);
+  sumTimer=setTimeout(function(){if(my===token&&running&&sumAccept)sumResult(false,true)},ms);
+}
+function sumResult(ok,timeout){
+  if(!sumAccept)return;
+  sumAccept=false;clearTimeout(sumTimer);var my=token;
+  if(ok){
+    done++;if(done>getBest())$('best').textContent=done;
+    $('sumQ').className='numshow ok';tone(3,200);msg.textContent=['Nice!','Sharp!','Quick!','Wow!'][done%4];
+    wait(700).then(function(){if(my===token&&running)sumRound()});
+  }else{
+    lives--;hearts();buzz(120);tone(-1,300,'sawtooth');
+    $('sumQ').className='numshow bad';$('sumQ').textContent=$('sumQ').textContent.replace('?',sumAnswer);
+    msg.textContent=timeout?'Time\u2019s up.':'Not quite.';
+    if(lives<=0)wait(1300).then(function(){if(my===token&&running)end()});
+    else wait(1500).then(function(){if(my===token&&running)sumRound()});
+  }
+}
+var HOW={classic:'Watch the tiles light up, then tap them in the same order.',reverse:'Watch the tiles, then tap them backwards: the last one first.',daily:'Same as Classic, but everyone gets the same pattern today.',numbers:'A number flashes briefly. Type it from memory once it disappears.',sums:'Tap the right answer before the bar runs out. Sums get tougher as you go.'};
+function renderHow(){
+  $('how').innerHTML='<p><b>'+NAMES[settings.mode]+':</b> '+HOW[settings.mode]+'</p><p>Each round gets harder. A mistake costs a heart, and you have three.</p><p><b>Tip:</b> group steps into chunks, like a phone number, or say them quietly to yourself.</p><p><b>Play like an app:</b> in your browser menu, choose Add to Home Screen.</p>';
+}
+function setHow(open){$('how').hidden=!open;$('howBtn').setAttribute('aria-expanded',open);$('howBtn').textContent=open?'Hide help':'How to play'}
+$('howBtn').addEventListener('click',function(){setHow($('how').hidden)});
+try{if(!localStorage.getItem('echo-seen')){setHow(true);localStorage.setItem('echo-seen','1')}}catch(e){}
+function toMenu(){token++;running=false;$('game').hidden=true;$('menu').hidden=false;renderMenu()}
+$('start').addEventListener('click',start);$('again').addEventListener('click',start);
+$('toMenu').addEventListener('click',toMenu);$('quit').addEventListener('click',toMenu);
+$('snd').addEventListener('click',function(){soundOn=!soundOn;$('snd').textContent=soundOn?'Sound on':'Sound off';$('snd').setAttribute('aria-pressed',soundOn)});
+$('share').addEventListener('click',function(){
+  var t='Echo '+NAMES[settings.mode]+' ('+settings.speed+'): '+(settings.mode==='sums'?'I solved '+done+' sums':'I held '+done+' steps in mind')+' 🧠 Can you beat it?';
+  var b=$('share');
+  try{
+    if(navigator.share){navigator.share({text:t,url:location.href}).catch(function(){})}
+    else if(navigator.clipboard){navigator.clipboard.writeText(t+' '+location.href).then(function(){b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500)})}
+  }catch(e){}
+});
+renderMenu();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+}
+</script>
+</body>
+</html>
