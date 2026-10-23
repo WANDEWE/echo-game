@@ -3,7 +3,7 @@
 A simple, free brain-training game for all ages that runs in any phone
 browser and installs to the home screen like an app.
 
-**Play it:** [your link]https://preeminent-bavarois-ebef37.netlify.appss
+**Play it:** https://preeminent-bavarois-ebef37.netlify.appss
 
 ## Modes
 - **Classic:** watch the tile pattern, then repeat it in order.
@@ -28,5 +28,4 @@ and a service worker for install and offline support. No build step and no
 dependencies. To run it locally, serve the folder with any static server,
 for example `python3 -m http.server`, and open it in a browser.
 
-## License
-[Choose one, for example MIT]
+
